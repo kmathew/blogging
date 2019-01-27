@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ var db = dynamodb.New(session.New(), aws.NewConfig().WithRegion(models.DefaultRe
 
 //var db = dynamodb.New(session.New(), aws.NewConfig().WithRegion("us-west-1").WithEndpoint("http://127.0.0.1:8000"))
 
-func registerAuthor(name string, displayName string, email string) (string, error) {
+func RegisterAuthor(name string, displayName string, email string) (string, error) {
 	author := models.Author{
 		Name:        name,
 		DisplayName: displayName,
@@ -44,7 +44,7 @@ func registerAuthor(name string, displayName string, email string) (string, erro
 	return resp.GoString(), nil
 }
 
-func createSpace(name string, ownerEmail string) error {
+func CreateSpace(name string, ownerEmail string) error {
 
 	space := models.Space{
 		Name:       name,
@@ -76,7 +76,7 @@ func createSpace(name string, ownerEmail string) error {
 	return nil
 }
 
-func getAuthor(email string) (models.Author, error) {
+func GetAuthor(email string) (models.Author, error) {
 	var author models.Author
 	params := &dynamodb.GetItemInput{
 		TableName: aws.String(models.AuthorsTable),
@@ -104,7 +104,7 @@ func getAuthor(email string) (models.Author, error) {
 	return author, nil
 }
 
-func getAuthorSpace(authorEmail string) ([]models.Space, error) {
+func GetAuthorSpace(authorEmail string) ([]models.Space, error) {
 	input := &dynamodb.QueryInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":v1": {
@@ -146,7 +146,7 @@ func getAuthorSpace(authorEmail string) ([]models.Space, error) {
 	return spaces, nil
 }
 
-func createBlog(title string, content []byte, spaceName string, authorEmail string) (string, error) {
+func CreateBlog(title string, content []byte, spaceName string, authorEmail string) (string, error) {
 	//generate id
 	//insert blog into table
 	//if spaceid belongs to authorid.... then auto approve
@@ -183,7 +183,7 @@ func createBlog(title string, content []byte, spaceName string, authorEmail stri
 	return resp.GoString(), nil
 }
 
-func getBlog(title string) ([]models.Blog, error) {
+func GetBlog(title string) ([]models.Blog, error) {
 	input := &dynamodb.QueryInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":v1": {
@@ -224,7 +224,7 @@ func getBlog(title string) ([]models.Blog, error) {
 	return blogs, nil
 }
 
-func approveBlog(spaceName string, blogTitle string, approverEmail string) (string, error) {
+func ApproveBlog(spaceName string, blogTitle string, approverEmail string) (string, error) {
 	blogsList, err := getBlog(blogTitle)
 	if err != nil {
 		return "", err
@@ -293,7 +293,7 @@ func approveBlog(spaceName string, blogTitle string, approverEmail string) (stri
 
 }
 
-func getBlogsForSpaceName(spaceName string) ([]models.Blog, error) {
+func GetBlogsForSpaceName(spaceName string) ([]models.Blog, error) {
 	//return all blogs associated with spaceid that are approved
 	input := &dynamodb.QueryInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
@@ -337,7 +337,7 @@ func getBlogsForSpaceName(spaceName string) ([]models.Blog, error) {
 	return blogs, nil
 }
 
-func getApprovedBlogs() ([]models.Blog, error) {
+func GetApprovedBlogs() ([]models.Blog, error) {
 	//get unapproved blogs
 	//return all blogs associated with spaceid that are unapproved
 	input := &dynamodb.QueryInput{
@@ -379,7 +379,7 @@ func getApprovedBlogs() ([]models.Blog, error) {
 	return blogs, nil
 }
 
-func getAllUnapprovedBlogs() ([]models.Blog, error) {
+func GetAllUnapprovedBlogs() ([]models.Blog, error) {
 	//get unapproved blogs
 	//return all blogs associated with spaceid that are unapproved
 	input := &dynamodb.QueryInput{
@@ -421,7 +421,7 @@ func getAllUnapprovedBlogs() ([]models.Blog, error) {
 	return blogs, nil
 }
 
-func getAllUnapprovedBlogsForSpace(spaceName string) ([]models.Blog, error) {
+func GetAllUnapprovedBlogsForSpace(spaceName string) ([]models.Blog, error) {
 	//get unapproved blogs
 	//return all blogs associated with spaceid that are unapproved
 	//return all blogs associated with spaceid that are approved
@@ -467,7 +467,7 @@ func getAllUnapprovedBlogsForSpace(spaceName string) ([]models.Blog, error) {
 	return blogs, nil
 }
 
-func getBlogsByAuthorEmail(authorEmail string) ([]models.Blog, error) {
+func GetBlogsByAuthorEmail(authorEmail string) ([]models.Blog, error) {
 	//return all blogs by author email
 	input := &dynamodb.QueryInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{

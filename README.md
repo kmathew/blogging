@@ -77,12 +77,12 @@ Gets a blog for a given title
 curl :/blogs?title=<title-name-here>
 ````
 ##### Get Blogs by Space Name
-Gets a list of blogs for a given space
+Gets a list of approved blogs for a given space
 ````
 curl :/blogs?space_name=<space-name-here>
 ````
 ##### Get Blogs by Author Email
-Gets a list of blogs by author email
+Gets a list of blogs by author email regardless if approved or not
 ````
 curl :/blogs?author_email=<email-address>
 ````
