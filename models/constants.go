@@ -15,14 +15,14 @@ const True string = "true"
 const False string = "false"
 
 //Tables
-const Spaces string = "Spaces"
-const Authors string = "Authors"
-const Blogs string = "Blogs"
+const SpacesTable string = "Spaces"
+const AuthorsTable string = "Authors"
+const BlogsTable string = "Blogs"
 
 //Keys
 //Authors
 const Email string = "email"
-const DispName string "display_name"
+const DispName string = "display_name"
 
 //Blogs
 const Title string = "title"

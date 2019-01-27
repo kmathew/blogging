@@ -23,7 +23,7 @@ func main() {
 	//AUTHORS
 	// create the api params
 	params := &dynamodb.CreateTableInput{
-		TableName: aws.String(c.Authors),
+		TableName: aws.String(c.AuthorsTable),
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{AttributeName: aws.String(c.Email), KeyType: aws.String("HASH")},
 			{AttributeName: aws.String(c.DispName), KeyType: aws.String("RANGE")},
@@ -51,7 +51,7 @@ func main() {
 	// create the api params
 	//noinspection GoInvalidCompositeLiteral
 	params = &dynamodb.CreateTableInput{
-		TableName: aws.String(c.Blogs),
+		TableName: aws.String(c.BlogsTable),
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{AttributeName: aws.String(c.Title), KeyType: aws.String("HASH")},
 			{AttributeName: aws.String(c.SpaceName), KeyType: aws.String("RANGE")},
@@ -151,7 +151,7 @@ func main() {
 	//Space
 	// create the api params
 	params = &dynamodb.CreateTableInput{
-		TableName: aws.String(c.Spaces),
+		TableName: aws.String(c.SpacesTable),
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{AttributeName: aws.String(c.SpaceName), KeyType: aws.String("HASH")},
 			{AttributeName: aws.String(c.OwnerEmail), KeyType: aws.String("RANGE")},

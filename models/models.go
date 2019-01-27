@@ -4,8 +4,8 @@ type Blog struct {
 	Title    string `json:"title" dynamodbav:"title"`
 	Content  []byte `json:"content" dynamodbav:"content"`
 	SpaceName  string `json:"space_name" dynamodbav:"space_name"`
-	AuthorName string `json:"author_name" dynamodbav:"author_name"` //local second
-	Approved bool `json:"author_name" dynamodbav:"author_name"`
+	AuthorEmail string `json:"author_email" dynamodbav:"author_email"` //local second
+	Approved string `json:"approved" dynamodbav:"approved"`
 	//APPROVED = local secondary index
 	//global secondary index author
 	//global secondary index space
@@ -21,7 +21,7 @@ type Author struct {
 }
 
 type Space struct {
-	Name		 string `json:"name" dynamodbav:"name"`
+	Name		 string `json:"space_name" dynamodbav:"space_name"`
 	OwnerEmail      string `json:"owner_email" dynamodbav:"owner_email"`
 	//blogs is a
 }
