@@ -77,7 +77,13 @@ curl :/spaces?owner_email=<email-address>
 ##### Create Blog
 Creates a blog that is not yet approved.
 ````
-curl -X POST :/blogs --date {"title": "fun1", "content": "bytes of data here", "space_name": "FUNZONE", "yo@yo.com" }
+curl -X POST :/blogs --date {
+                            	"title": "fun1",
+                                "content": "getestsagsdg",
+                            	"space_name": "FUNZONE",
+                            	"author_email": "yo@yo.com",
+                            	"approved": ""
+                            }
 ````
 ##### Get Blog by Title
 Gets a blog for a given title
