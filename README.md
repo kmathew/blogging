@@ -37,6 +37,7 @@ POST --data {
              	"display_name": "sdfsf",
              	"email": "yo@yo.com"
              }
+
              
 ##### Get Author Obj
 Get Author Object
@@ -76,5 +77,3 @@ curl :/blogs?author_email=<email-address>
 Approves a blog to be published to a space
 
 curl -X POST :/approve --data {"title": "fun1", "space_name": "FUNZONE", "yo@yo.com"}
-
-
