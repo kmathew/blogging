@@ -26,7 +26,7 @@ for to see what permission is missing for a specific resource. It might be one o
 service to work.
 
 Please run create_tables.go to generate the tables once. No environment variables need to be set unless you plan to 
-connect to a local docker container running dynamoDB.
+connect to a local docker container running dynamoDB. By default, in constants file, it's set to use us-west-1 for region.
 
 For Deployment, create a function for each:
 - authors
@@ -75,7 +75,7 @@ Retrieves space by given owner email
 curl :/spaces?owner_email=<email-address>
 ````
 ##### Create Blog
-Creates a blog that is not yet approved.
+Creates a blog that is not yet approved. Please make sure content field value is in bytes otherwise Marshal will fail.
 ````
 curl -X POST :/blogs --date {
                             	"title": "fun1",

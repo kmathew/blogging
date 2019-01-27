@@ -1,8 +1,10 @@
 package models
 
+import "encoding/json"
+
 type Blog struct {
 	Title       string `json:"title" dynamodbav:"title"`
-	Content     []byte `json:"content" dynamodbav:"content"`
+	Content     json.RawMessage `json:"content" dynamodbav:"content"`
 	SpaceName   string `json:"space_name" dynamodbav:"space_name"`
 	AuthorEmail string `json:"author_email" dynamodbav:"author_email"` //local second
 	Approved    string `json:"approved" dynamodbav:"approved"`
