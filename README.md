@@ -19,3 +19,30 @@ https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html
 Setup IAM Policy
 https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html
 
+In the root directory, there's a file called trust.json. This is a policy that needs to be attached to the role for the
+lambda functions to work properly without resulting in Internal Server Errors. In order to get the resource id,
+after deploying, test the api gateway. If you get a 500 Internal Server error, go and check the logs
+for to see what permission is missing for a specific resource. It might be one of the tables for this
+service to work.
+
+#####Register Author
+curl <uri>:/authors
+POST --data {
+             	"name": "kev",
+             	"display_name": "sdfsf",
+             	"email": "yo@yo.com"
+             }
+#####Get Author Obj
+curl :/authors?email=<email-address>
+
+#####Create Space
+curl -X POST :/spaces  --data { "space_name": "FUNZONE", "owner_email": "yo@yo.com" }
+
+#####Get Space by Author Email
+curl :/spaces?owner_email=<email-address>
+
+#####Create Blog
+curl -X POST :/blogs --date {"title": "fun1", "content": "bytes of data here", "space_name": "FUNZONE", "yo@yo.com" }
+
+#####Get Blog by Title
+curl :/blogs?title=<title-name-here>
