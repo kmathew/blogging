@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/kmathew/blogging/models"
+	"github.com/kmathew/blogging/db"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -29,7 +30,7 @@ func show(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, er
 
 	email := req.QueryStringParameters[models.Email]
 
-	author, err := getAuthor(email)
+	author, err := db.GetAuthor(email)
 	if err != nil {
 		return serverError(err)
 	}
@@ -63,7 +64,7 @@ func create(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 		return clientError(http.StatusBadRequest)
 	}
 
-	str, err := registerAuthor(author.Name, author.DisplayName, author.Email)
+	str, err := db.RegisterAuthor(author.Name, author.DisplayName, author.Email)
 	if err != nil || str == "" {
 		return serverError(err)
 	}

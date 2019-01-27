@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kmathew/blogging/models"
+	"github.com/kmathew/blogging/db"
 	"log"
 	"net/http"
 	"os"
@@ -38,7 +39,7 @@ func create(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 		return clientError(http.StatusBadRequest)
 	}
 
-	str, err := approveBlog(approve.SpaceName, approve.Title, approve.ApproverEmail)
+	str, err := db.ApproveBlog(approve.SpaceName, approve.Title, approve.ApproverEmail)
 	if err != nil || str == "" {
 		return serverError(err)
 	}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kmathew/blogging/models"
+	"github.com/kmathew/blogging/db"
 	"log"
 	"net/http"
 	"os"
@@ -37,7 +38,7 @@ func router(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 func showByTitle(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	title := req.QueryStringParameters[models.Title]
 
-	blog, err := getBlog(title)
+	blog, err := db.GetBlog(title)
 	if err != nil {
 		return serverError(err)
 	}
@@ -59,7 +60,7 @@ func showByTitle(req events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 func showListBySpaceName(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	spaceName := req.QueryStringParameters[models.SpaceName]
 
-	blogs, err := getBlogsForSpaceName(spaceName)
+	blogs, err := db.GetBlogsForSpaceName(spaceName)
 	if err != nil {
 		return serverError(err)
 	}
@@ -81,7 +82,7 @@ func showListBySpaceName(req events.APIGatewayProxyRequest) (events.APIGatewayPr
 func showListByAuthor(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	authorEmail := req.QueryStringParameters[models.AuthorEmail]
 
-	blogs, err := getBlogsByAuthorEmail(authorEmail)
+	blogs, err := db.GetBlogsByAuthorEmail(authorEmail)
 	if err != nil {
 		return serverError(err)
 	}
@@ -115,7 +116,7 @@ func create(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 		return clientError(http.StatusBadRequest)
 	}
 
-	str, err := createBlog(blog.Title, blog.Content, blog.SpaceName, blog.AuthorEmail)
+	str, err := db.CreateBlog(blog.Title, blog.Content, blog.SpaceName, blog.AuthorEmail)
 	if err != nil || str == "" {
 		return serverError(err)
 	}

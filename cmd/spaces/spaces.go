@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/kmathew/blogging/models"
+	"github.com/kmathew/blogging/db"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -28,7 +29,7 @@ func router(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 func show(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	ownerEmail := req.QueryStringParameters[models.OwnerEmail]
 
-	space, err := getAuthorSpace(ownerEmail)
+	space, err := db.GetAuthorSpace(ownerEmail)
 	if err != nil {
 		return serverError(err)
 	}
@@ -62,7 +63,7 @@ func create(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 		return clientError(http.StatusBadRequest)
 	}
 
-	err = createSpace(space.Name, space.OwnerEmail)
+	err = db.CreateSpace(space.Name, space.OwnerEmail)
 	if err != nil {
 		return serverError(err)
 	}
