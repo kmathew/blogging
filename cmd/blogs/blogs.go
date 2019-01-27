@@ -17,7 +17,16 @@ var errorLogger = log.New(os.Stderr, "ERROR ", log.Llongfile)
 func router(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch req.HTTPMethod {
 	case "GET":
-		return show(req)
+		q := req.QueryStringParameters
+		if q[models.Title] != "" {
+			return showByTitle(req)
+		} else if q[models.SpaceName] != "" {
+			return showListBySpaceName(req)
+		} else if q[models.AuthorEmail] != "" {
+			return showListByAuthor(req)
+		} else {
+			return clientError(http.StatusBadRequest)
+		}
 	case "POST":
 		return create(req)
 	default:
@@ -25,7 +34,7 @@ func router(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 	}
 }
 
-func show(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func showByTitle(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	title := req.QueryStringParameters[models.Title]
 
 	blog, err := getBlog(title)
@@ -37,6 +46,50 @@ func show(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, er
 	}
 
 	js, err := json.Marshal(blog)
+	if err != nil {
+		return serverError(err)
+	}
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusOK,
+		Body:       string(js),
+	}, nil
+}
+
+func showListBySpaceName(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	spaceName := req.QueryStringParameters[models.SpaceName]
+
+	blogs, err := getBlogsForSpaceName(spaceName)
+	if err != nil {
+		return serverError(err)
+	}
+	if blogs == nil {
+		return clientError(http.StatusNotFound)
+	}
+
+	js, err := json.Marshal(blogs)
+	if err != nil {
+		return serverError(err)
+	}
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusOK,
+		Body:       string(js),
+	}, nil
+}
+
+func showListByAuthor(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	authorEmail := req.QueryStringParameters[models.AuthorEmail]
+
+	blogs, err := getBlogsByAuthorEmail(authorEmail)
+	if err != nil {
+		return serverError(err)
+	}
+	if blogs == nil {
+		return clientError(http.StatusNotFound)
+	}
+
+	js, err := json.Marshal(blogs)
 	if err != nil {
 		return serverError(err)
 	}
