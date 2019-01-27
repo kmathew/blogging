@@ -1,6 +1,7 @@
 package main
 
 import (
+	c "blogging/models"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,14 +23,14 @@ func main() {
 	//AUTHORS
 	// create the api params
 	params := &dynamodb.CreateTableInput{
-		TableName: aws.String("Authors"),
+		TableName: aws.String(c.Authors),
 		KeySchema: []*dynamodb.KeySchemaElement{
-			{AttributeName: aws.String("email"), KeyType: aws.String("HASH")},
-			{AttributeName: aws.String("display_name"), KeyType: aws.String("RANGE")},
+			{AttributeName: aws.String(c.Email), KeyType: aws.String("HASH")},
+			{AttributeName: aws.String(c.DispName), KeyType: aws.String("RANGE")},
 		},
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
-			{AttributeName: aws.String("email"), AttributeType: aws.String("S")},
-			{AttributeName: aws.String("display_name"), AttributeType: aws.String("S")},
+			{AttributeName: aws.String(c.Email), AttributeType: aws.String("S")},
+			{AttributeName: aws.String(c.DispName), AttributeType: aws.String("S")},
 		},
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
 			ReadCapacityUnits:  aws.Int64(10),
@@ -50,23 +51,23 @@ func main() {
 	// create the api params
 	//noinspection GoInvalidCompositeLiteral
 	params = &dynamodb.CreateTableInput{
-		TableName: aws.String("Blogs"),
+		TableName: aws.String(c.Blogs),
 		KeySchema: []*dynamodb.KeySchemaElement{
-			{AttributeName: aws.String("title"), KeyType: aws.String("HASH")},
-			{AttributeName: aws.String("space_name"), KeyType: aws.String("RANGE")},
+			{AttributeName: aws.String(c.Title), KeyType: aws.String("HASH")},
+			{AttributeName: aws.String(c.SpaceName), KeyType: aws.String("RANGE")},
 		},
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
-			{AttributeName: aws.String("title"), AttributeType: aws.String("S")},
-			{AttributeName: aws.String("space_name"), AttributeType: aws.String("S")},
-			{AttributeName: aws.String("author_name"), AttributeType: aws.String("S")},
-			{AttributeName: aws.String("approved"), AttributeType: aws.String("S")},
+			{AttributeName: aws.String(c.Title), AttributeType: aws.String("S")},
+			{AttributeName: aws.String(c.SpaceName), AttributeType: aws.String("S")},
+			{AttributeName: aws.String(c.AuthorEmail), AttributeType: aws.String("S")},
+			{AttributeName: aws.String(c.Approved), AttributeType: aws.String("S")},
 		},
 		LocalSecondaryIndexes: []*dynamodb.LocalSecondaryIndex {
 			{
-				IndexName: aws.String("local_index_author"),
+				IndexName: aws.String(c.LocalIndexAuthor),
 				KeySchema: []*dynamodb.KeySchemaElement{
-					{AttributeName: aws.String("title"), KeyType: aws.String("HASH")},
-					{AttributeName: aws.String("author_name"), KeyType: aws.String("RANGE")},
+					{AttributeName: aws.String(c.Title), KeyType: aws.String("HASH")},
+					{AttributeName: aws.String(c.AuthorEmail), KeyType: aws.String("RANGE")},
 				},
 				Projection: &dynamodb.Projection{
 					NonKeyAttributes: nil,
@@ -74,7 +75,7 @@ func main() {
 				},
 			},
 			{
-				IndexName: aws.String("local_index_approved"),
+				IndexName: aws.String(c.LocalIndexApproved),
 				KeySchema: []*dynamodb.KeySchemaElement{
 					{AttributeName: aws.String("title"), KeyType: aws.String("HASH")},
 					{AttributeName: aws.String("approved"), KeyType: aws.String("RANGE")},
@@ -87,10 +88,10 @@ func main() {
 		},
 		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex {
 			{
-				IndexName: aws.String("global_index_space_name"),
+				IndexName: aws.String(c.GlobalIndexSpaceName),
 				KeySchema: []*dynamodb.KeySchemaElement{
-					{AttributeName: aws.String("space_name"), KeyType: aws.String("HASH")},
-					{AttributeName: aws.String("author_name"), KeyType: aws.String("RANGE")},
+					{AttributeName: aws.String(c.SpaceName), KeyType: aws.String("HASH")},
+					{AttributeName: aws.String(c.AuthorEmail), KeyType: aws.String("RANGE")},
 				},
 				Projection: &dynamodb.Projection{
 					NonKeyAttributes: nil,
@@ -102,10 +103,10 @@ func main() {
 				},
 			},
 			{
-				IndexName: aws.String("global_index_author_name"),
+				IndexName: aws.String(c.GlobalIndexAuthorEmail),
 				KeySchema: []*dynamodb.KeySchemaElement{
-					{AttributeName: aws.String("author_name"), KeyType: aws.String("HASH")},
-					{AttributeName: aws.String("title"), KeyType: aws.String("RANGE")},
+					{AttributeName: aws.String(c.AuthorEmail), KeyType: aws.String("HASH")},
+					{AttributeName: aws.String(c.Title), KeyType: aws.String("RANGE")},
 				},
 				Projection: &dynamodb.Projection{
 					NonKeyAttributes: nil,
@@ -117,10 +118,10 @@ func main() {
 				},
 			},
 			{
-				IndexName: aws.String("global_index_approved"),
+				IndexName: aws.String(c.GlobalIndexApproved),
 				KeySchema: []*dynamodb.KeySchemaElement{
-					{AttributeName: aws.String("approved"), KeyType: aws.String("HASH")},
-					{AttributeName: aws.String("title"), KeyType: aws.String("RANGE")},
+					{AttributeName: aws.String(c.Approved), KeyType: aws.String("HASH")},
+					{AttributeName: aws.String(c.Title), KeyType: aws.String("RANGE")},
 				},
 				Projection: &dynamodb.Projection{
 					NonKeyAttributes: nil,
@@ -147,17 +148,34 @@ func main() {
 	// print the response data
 	fmt.Println(resp)
 
-	/*//Space
+	//Space
 	// create the api params
 	params = &dynamodb.CreateTableInput{
-		TableName: aws.String("Spaces"),
+		TableName: aws.String(c.Spaces),
 		KeySchema: []*dynamodb.KeySchemaElement{
-			{AttributeName: aws.String("space_name"), KeyType: aws.String("HASH")},
-			{AttributeName: aws.String("owner_name"), KeyType: aws.String("RANGE")},
+			{AttributeName: aws.String(c.SpaceName), KeyType: aws.String("HASH")},
+			{AttributeName: aws.String(c.OwnerEmail), KeyType: aws.String("RANGE")},
 		},
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
-			{AttributeName: aws.String("space_name"), AttributeType: aws.String("S")},
-			{AttributeName: aws.String("owner_name"), AttributeType: aws.String("S")},
+			{AttributeName: aws.String(c.SpaceName), AttributeType: aws.String("S")},
+			{AttributeName: aws.String(c.OwnerEmail), AttributeType: aws.String("S")},
+		},
+		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex{
+			{
+				IndexName: aws.String(c.GlobalIndexOwnerEmail),
+				KeySchema: []*dynamodb.KeySchemaElement{
+					{AttributeName: aws.String(c.OwnerEmail), KeyType: aws.String("HASH")},
+					{AttributeName: aws.String(c.SpaceName), KeyType: aws.String("RANGE")},
+				},
+				Projection: &dynamodb.Projection{
+					NonKeyAttributes: nil,
+					ProjectionType:   aws.String("ALL"),
+				},
+				ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+					ReadCapacityUnits:  aws.Int64(10),
+					WriteCapacityUnits: aws.Int64(100),
+				},
+			},
 		},
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
 			ReadCapacityUnits:  aws.Int64(10),
@@ -171,33 +189,6 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
-
-	// print the response data
-	fmt.Println(resp)
-*/
-	//Approval
-	// create the api params
-	/*params = &dynamodb.CreateTableInput{
-		TableName: aws.String("Approvals"),
-		KeySchema: []*dynamodb.KeySchemaElement{
-			{AttributeName: aws.String("approval_id"), KeyType: aws.String("HASH")},
-			{AttributeName: aws.String("space_name"), KeyType: aws.String("RANGE")},
-		},
-		AttributeDefinitions: []*dynamodb.AttributeDefinition{
-			{AttributeName: aws.String("approval_id"), AttributeType: aws.String("S")},
-			{AttributeName: aws.String("space_name"), AttributeType: aws.String("S")},
-		},
-		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
-			ReadCapacityUnits:  aws.Int64(10),
-			WriteCapacityUnits: aws.Int64(100),
-		},
-	}
-	// create the table
-	resp, err = db.CreateTable(params)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}*/
 
 	// print the response data
 	fmt.Println(resp)

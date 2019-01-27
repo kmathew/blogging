@@ -17,13 +17,12 @@ type Author struct {
 	Name    string `json:"name" dynamodbav:"name"`
 	DisplayName  string `json:"display_name" dynamodbav:"display_name"`
 	Email string `json:"email" dynamodbav:"email"`
-	SpaceName string `json:"owned_space_name" dynamodbav:"owned_space_name"`
 	//spaces is global secondary index
 }
 
 type Space struct {
 	Name		 string `json:"name" dynamodbav:"name"`
-	OwnerName      string `json:"owner_name" dynamodbav:"owner_name"`
+	OwnerEmail      string `json:"owner_email" dynamodbav:"owner_email"`
 	//blogs is a
 }
 
