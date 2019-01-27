@@ -25,24 +25,56 @@ after deploying, test the api gateway. If you get a 500 Internal Server error, g
 for to see what permission is missing for a specific resource. It might be one of the tables for this
 service to work.
 
-#####Register Author
+Please run create_tables.go to generate the tables once. No environment variables need to be set unless you plan to connect to a local docker
+container running dynamoDB.
+
+##### Register Author
+Registers user
+
 curl <uri>:/authors
 POST --data {
              	"name": "kev",
              	"display_name": "sdfsf",
              	"email": "yo@yo.com"
              }
-#####Get Author Obj
+             
+##### Get Author Obj
+Get Author Object
+
 curl :/authors?email=<email-address>
 
-#####Create Space
+##### Create Space
+Creates a Space under the user.
+
 curl -X POST :/spaces  --data { "space_name": "FUNZONE", "owner_email": "yo@yo.com" }
 
-#####Get Space by Author Email
+##### Get Space by Author Email
+Retrieves space by given owner email
+
 curl :/spaces?owner_email=<email-address>
 
-#####Create Blog
+##### Create Blog
+Creates a blog that is not yet approved.
 curl -X POST :/blogs --date {"title": "fun1", "content": "bytes of data here", "space_name": "FUNZONE", "yo@yo.com" }
 
-#####Get Blog by Title
+##### Get Blog by Title
+Gets a blog for a given title
+
 curl :/blogs?title=<title-name-here>
+
+##### Get Blogs by Space Name
+Gets a list of blogs for a given space
+
+curl :/blogs?space_name=<space-name-here>
+
+##### Get Blogs by Author Email
+Gets a list of blogs by author email
+
+curl :/blogs?author_email=<email-address>
+
+##### Approve Blog
+Approves a blog to be published to a space
+
+curl -X POST :/approve --data {"title": "fun1", "space_name": "FUNZONE", "yo@yo.com"}
+
+
