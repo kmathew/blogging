@@ -146,6 +146,47 @@ func GetAuthorSpace(authorEmail string) ([]models.Space, error) {
 	return spaces, nil
 }
 
+func GetSpaceByName(spaceName string) ([]models.Space, error) {
+	input := &dynamodb.QueryInput{
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":v1": {
+				S: aws.String(spaceName),
+			},
+		},
+		KeyConditionExpression: aws.String("space_name = :v1"),
+		ProjectionExpression:   aws.String(models.SpaceName),
+		TableName:              aws.String(models.SpacesTable),
+	}
+
+	result, err := db.Query(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case dynamodb.ErrCodeProvisionedThroughputExceededException:
+				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
+			case dynamodb.ErrCodeResourceNotFoundException:
+				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
+			case dynamodb.ErrCodeRequestLimitExceeded:
+				fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
+			case dynamodb.ErrCodeInternalServerError:
+				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return nil, err
+	}
+
+	spaces := []models.Space{}
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &spaces)
+
+	return spaces, nil
+}
+
 func CreateBlog(title string, content []byte, spaceName string, authorEmail string) (string, error) {
 	//generate id
 	//insert blog into table
