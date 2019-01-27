@@ -9,6 +9,7 @@ const GlobalIndexAuthorEmail string = "global_index_author_email"
 const GlobalIndexApproved string = "global_index_approved"
 
 const GlobalIndexOwnerEmail string = "global_index_owner_email"
+const GlobalIndexSpaceNameApproved string = "global_index_sn_approved"
 
 //Bool
 const True string = "true"

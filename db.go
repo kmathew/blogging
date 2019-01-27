@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"blogging/models"
+	"errors"
 )
 
 var db = dynamodb.New(session.New(), aws.NewConfig().WithRegion("us-west-1").WithEndpoint("http://127.0.0.1:8000"))
@@ -225,18 +226,72 @@ func getBlog(title string) ([]models.Blog, error) {
 	return blogs, nil
 }
 
-func approveBlog(spaceName string, blogTitle string, approverEmail string) {
+func approveBlog(spaceName string, blogTitle string, approverEmail string) (string, error) {
 	blogsList, err := getBlog(blogTitle)
 	if err != nil {
-
+		return "", err
 	}
 	spacesList, err := getAuthorSpace(approverEmail)
 
+	if err != nil {
+		return "", err
+	}
+
 	if (blogsList[0].SpaceName == spaceName && spacesList[0].Name == spaceName) {
 		//means we can approve it
-	} else {
-		//fail.. cant approve it because blog/space doesnt exist or not owner of space
+		input := &dynamodb.UpdateItemInput{
+			ExpressionAttributeNames: map[string]*string{
+				"#AT": aws.String(models.Approved),
+			},
+			ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+				":t": {
+					S: aws.String(models.True),
+				},
+			},
+			Key: map[string]*dynamodb.AttributeValue{
+				models.Title: {
+					S: aws.String(blogTitle),
+				},
+				models.SpaceName: {
+					S: aws.String(spaceName),
+				},
+			},
+			ReturnValues:     aws.String("ALL_NEW"),
+			TableName:        aws.String(models.BlogsTable),
+			UpdateExpression: aws.String("SET #AT = :t"),
+		}
+		result, err := db.UpdateItem(input)
+		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				switch aerr.Code() {
+				case dynamodb.ErrCodeConditionalCheckFailedException:
+					fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
+				case dynamodb.ErrCodeProvisionedThroughputExceededException:
+					fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
+				case dynamodb.ErrCodeResourceNotFoundException:
+					fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
+				case dynamodb.ErrCodeItemCollectionSizeLimitExceededException:
+					fmt.Println(dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
+				case dynamodb.ErrCodeTransactionConflictException:
+					fmt.Println(dynamodb.ErrCodeTransactionConflictException, aerr.Error())
+				case dynamodb.ErrCodeRequestLimitExceeded:
+					fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
+				case dynamodb.ErrCodeInternalServerError:
+					fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
+				default:
+					fmt.Println(aerr.Error())
+				}
+			} else {
+				// Print the error, cast err to awserr.Error to get the Code and
+				// Message from an error.
+				fmt.Println(err.Error())
+			}
+			return "", err
+		}
+		fmt.Println(result)
 	}
+		//fail.. cant approve it because blog/space doesnt exist or not owner of space
+	return "", errors.New("fail.. cant approve it because blog/space doesnt exist or not owner of space")
 
 }
 
@@ -247,8 +302,11 @@ func getBlogsForSpaceName(spaceName string) ([]models.Blog, error) {
 			":v1": {
 				S: aws.String(spaceName),
 			},
+			":v2": {
+				S: aws.String(models.True),
+			},
 		},
-		KeyConditionExpression: aws.String("space_name = :v1"),
+		KeyConditionExpression: aws.String("space_name = :v1 and approved = :v2"),
 		TableName:              aws.String(models.BlogsTable),
 		IndexName: aws.String(models.GlobalIndexSpaceName),
 	}
@@ -292,7 +350,7 @@ func getApprovedBlogs() ([]models.Blog, error) {
 		},
 		KeyConditionExpression: aws.String("approved = :v1"),
 		TableName:              aws.String(models.BlogsTable),
-		IndexName: aws.String(models.LocalIndexApproved),
+		IndexName: aws.String(models.GlobalIndexApproved),
 	}
 
 	result, err := db.Query(input)
@@ -323,7 +381,7 @@ func getApprovedBlogs() ([]models.Blog, error) {
 	return blogs, nil
 }
 
-func getUnapprovedBlogs() ([]models.Blog, error) {
+func getAllUnapprovedBlogs() ([]models.Blog, error) {
 	//get unapproved blogs
 	//return all blogs associated with spaceid that are unapproved
 	input := &dynamodb.QueryInput{
@@ -335,6 +393,52 @@ func getUnapprovedBlogs() ([]models.Blog, error) {
 		KeyConditionExpression: aws.String("approved = :v1"),
 		TableName:              aws.String(models.BlogsTable),
 		IndexName: aws.String(models.GlobalIndexApproved),
+	}
+
+	result, err := db.Query(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case dynamodb.ErrCodeProvisionedThroughputExceededException:
+				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
+			case dynamodb.ErrCodeResourceNotFoundException:
+				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
+			case dynamodb.ErrCodeRequestLimitExceeded:
+				fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
+			case dynamodb.ErrCodeInternalServerError:
+				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return nil, err
+	}
+
+	blogs := []models.Blog{}
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &blogs)
+	return blogs, nil
+}
+
+func getAllUnapprovedBlogsForSpace(spaceName string) ([]models.Blog, error) {
+	//get unapproved blogs
+	//return all blogs associated with spaceid that are unapproved
+	//return all blogs associated with spaceid that are approved
+	input := &dynamodb.QueryInput{
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":v1": {
+				S: aws.String(spaceName),
+			},
+			":v2": {
+				S: aws.String(models.False),
+			},
+		},
+		KeyConditionExpression: aws.String("space_name = :v1 and approved = :v2"),
+		TableName:              aws.String(models.BlogsTable),
+		IndexName: aws.String(models.GlobalIndexSpaceNameApproved),
 	}
 
 	result, err := db.Query(input)
@@ -407,16 +511,18 @@ func getBlogsByAuthorEmail(authorEmail string) ([]models.Blog, error) {
 }
 
 func main() {
-	/*err := registerAuthor("kevin", "tile", "yo@yo.com")
+	/*str, err := registerAuthor("kevin", "tile", "yo@yo.com")
 	if(err != nil ) {
 		fmt.Println("Failed to register author")
-	}*/
+	}
+
+	fmt.Println(str)
 	a, err := getAuthor("yo@yo.com", "tile")
 	if (err != nil) {
 		panic("RIP")
 	}
 
-	//createSpace("FUNZONE", "yo@yo.com")
+	createSpace("FUNZONE", "yo@yo.com")
 
 	fmt.Println(a.Email)
 
@@ -426,13 +532,15 @@ func main() {
 	}
 	fmt.Println(s[0].Name)
 	createBlog("fun2",[]byte("mkmkk"),"FUNZONE","yo@yo.com")
-
+	*/
 	/*b, err := getBlog("fun1")
 	if (err != nil) {
 		panic("RIP make blog")
 	}*/
 
-	b, err := getUnapprovedBlogs()
+	//approveBlog("FUNZONE", "fun2", "yo@yo.com")
+
+	b, err := getAllUnapprovedBlogsForSpace("FUNZONE")
 	if (err != nil) {
 		panic("RIP unapproved blog")
 	}

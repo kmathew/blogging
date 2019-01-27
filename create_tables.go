@@ -132,6 +132,21 @@ func main() {
 					WriteCapacityUnits: aws.Int64(100),
 				},
 			},
+			{
+				IndexName: aws.String(c.GlobalIndexSpaceNameApproved),
+				KeySchema: []*dynamodb.KeySchemaElement{
+					{AttributeName: aws.String(c.Approved), KeyType: aws.String("HASH")},
+					{AttributeName: aws.String(c.SpaceName), KeyType: aws.String("RANGE")},
+				},
+				Projection: &dynamodb.Projection{
+					NonKeyAttributes: nil,
+					ProjectionType:   aws.String("ALL"),
+				},
+				ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+					ReadCapacityUnits:  aws.Int64(10),
+					WriteCapacityUnits: aws.Int64(100),
+				},
+			},
 		},
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
 			ReadCapacityUnits:  aws.Int64(10),
