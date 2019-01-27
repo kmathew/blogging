@@ -13,19 +13,19 @@ func main() {
 
 	region, check := os.LookupEnv(c.EnvRegion)
 
-	if(!check) {
+	if (!check) {
 		region = c.DefaultRegion
 	}
 
 	endpoint, check := os.LookupEnv(c.EnvEndpoint)
 
-	if(!check) {
+	if (!check) {
 		endpoint = c.DefaultEndpoint
 	}
 
 	// create an aws session
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region:   aws.String(region),
+		Region: aws.String(region),
 		//Endpoint: aws.String("http://127.0.0.1:8000"),
 		Endpoint: aws.String(endpoint),
 	}))
@@ -73,7 +73,7 @@ func main() {
 			{AttributeName: aws.String(c.AuthorEmail), AttributeType: aws.String("S")},
 			{AttributeName: aws.String(c.Approved), AttributeType: aws.String("S")},
 		},
-		LocalSecondaryIndexes: []*dynamodb.LocalSecondaryIndex {
+		LocalSecondaryIndexes: []*dynamodb.LocalSecondaryIndex{
 			{
 				IndexName: aws.String(c.LocalIndexAuthor),
 				KeySchema: []*dynamodb.KeySchemaElement{
@@ -97,7 +97,7 @@ func main() {
 				},
 			},
 		},
-		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex {
+		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex{
 			{
 				IndexName: aws.String(c.GlobalIndexSpaceName),
 				KeySchema: []*dynamodb.KeySchemaElement{

@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kmathew/blogging/models"
 	"github.com/kmathew/blogging/db"
+	"github.com/kmathew/blogging/models"
 	"log"
 	"net/http"
 	"os"

@@ -21,8 +21,8 @@ type Author struct {
 }
 
 type Space struct {
-	Name            string            `json:"space_name" dynamodbav:"space_name"`
-	OwnerEmail      string            `json:"owner_email" dynamodbav:"owner_email"`
+	Name       string `json:"space_name" dynamodbav:"space_name"`
+	OwnerEmail string `json:"owner_email" dynamodbav:"owner_email"`
 }
 
 type Approval struct {

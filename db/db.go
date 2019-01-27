@@ -78,7 +78,7 @@ func GetAuthor(email string) (models.Author, error) {
 func CreateSpace(name string, ownerEmail string) error {
 	a, err := GetAuthor(ownerEmail)
 
-	if(err != nil) {
+	if (err != nil) {
 		return err
 	}
 
@@ -201,14 +201,14 @@ func CreateBlog(title string, content []byte, spaceName string, authorEmail stri
 	//validate authorEmail
 	a, err := GetAuthor(authorEmail)
 
-	if(err != nil) {
+	if (err != nil) {
 		return "", err
 	}
 
 	//validate Space
 	s, err := GetSpaceByName(spaceName)
 
-	if(err != nil) {
+	if (err != nil) {
 		return "", err
 	}
 
