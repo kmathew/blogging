@@ -18,7 +18,14 @@ var errorLogger = log.New(os.Stderr, "ERROR ", log.Llongfile)
 func router(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch req.HTTPMethod {
 	case "GET":
-		return show(req)
+		q := req.QueryStringParameters
+		if q[models.OwnerEmail] != "" {
+			return showByOwner(req)
+		} else if q[models.SpaceName] != "" {
+			return showBySpaceName(req)
+		} else {
+			return clientError(http.StatusBadRequest)
+		}
 	case "POST":
 		return create(req)
 	default:
@@ -26,7 +33,29 @@ func router(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 	}
 }
 
-func show(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func showBySpaceName(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	spaceName := req.QueryStringParameters[models.SpaceName]
+
+	space, err := db.GetSpaceByName(spaceName)
+	if err != nil {
+		return serverError(err)
+	}
+	if space == nil {
+		return clientError(http.StatusNotFound)
+	}
+
+	js, err := json.Marshal(space)
+	if err != nil {
+		return serverError(err)
+	}
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusOK,
+		Body:       string(js),
+	}, nil
+}
+
+func showByOwner(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	ownerEmail := req.QueryStringParameters[models.OwnerEmail]
 
 	space, err := db.GetAuthorSpace(ownerEmail)
