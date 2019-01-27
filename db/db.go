@@ -369,7 +369,7 @@ func GetBlogsForSpaceName(spaceName string) ([]models.Blog, error) {
 		},
 		KeyConditionExpression: aws.String("space_name = :v1 and approved = :v2"),
 		TableName:              aws.String(models.BlogsTable),
-		IndexName:              aws.String(models.GlobalIndexSpaceName),
+		IndexName:              aws.String(models.GlobalIndexSpaceNameApproved),
 	}
 
 	result, err := db.Query(input)
