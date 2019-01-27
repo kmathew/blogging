@@ -3,18 +3,31 @@ package main
 import (
 	c "blogging/models"
 	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"os"
 )
 
 func main() {
+
+	region, check := os.LookupEnv(c.EnvRegion)
+
+	if(!check) {
+		region = c.DefaultRegion
+	}
+
+	endpoint, check := os.LookupEnv(c.EnvEndpoint)
+
+	if(!check) {
+		endpoint = c.DefaultEndpoint
+	}
+
 	// create an aws session
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region:   aws.String("us-west-1"),
-		Endpoint: aws.String("http://127.0.0.1:8000"),
-		//EndPoint: aws.String("https://dynamodb.us-east-1.amazonaws.com"),
+		Region:   aws.String(region),
+		//Endpoint: aws.String("http://127.0.0.1:8000"),
+		Endpoint: aws.String(endpoint),
 	}))
 
 	// create a dynamodb instance
@@ -26,11 +39,9 @@ func main() {
 		TableName: aws.String(c.AuthorsTable),
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{AttributeName: aws.String(c.Email), KeyType: aws.String("HASH")},
-			{AttributeName: aws.String(c.DispName), KeyType: aws.String("RANGE")},
 		},
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{AttributeName: aws.String(c.Email), AttributeType: aws.String("S")},
-			{AttributeName: aws.String(c.DispName), AttributeType: aws.String("S")},
 		},
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
 			ReadCapacityUnits:  aws.Int64(10),

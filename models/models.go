@@ -28,10 +28,7 @@ type Space struct {
 
 type Approval struct {
 	//ApprovalID = SpaceName+BlogTitle
-	ApprovalID string `json:"approval_id" dynamodbav:"name"`
 	SpaceName    string  `json:"space_name" dynamodbav:"space_name"`
-	RequestorName string `json:"requestor_name" dynamodbav:"requestor_name"`
-	ApproverName string `json:"approver_name" dynamodbav:"approver_name"`
-	BlogTitle     string `json:"blog_title" dynamodbav:"blog_title"`
-	Status     string `json:"status" dynamodbav:"status"`
+	ApproverEmail string `json:"approver_email" dynamodbav:"approver_email"`
+	Title     string `json:"title" dynamodbav:"title"`
 }

@@ -1,18 +1,19 @@
 package main
 
 import (
+	"blogging/models"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"blogging/models"
-	"errors"
+	"os"
 )
 
-var db = dynamodb.New(session.New(), aws.NewConfig().WithRegion("us-west-1").WithEndpoint("http://127.0.0.1:8000"))
-//var db = dynamodb.New(session.New(), aws.NewConfig().WithRegion("us-east-1").WithEndpoint("http://127.0.0.1:8000"))
+var db = dynamodb.New(session.New(), aws.NewConfig().WithRegion(os.Getenv(models.EnvRegion)))
+//var db = dynamodb.New(session.New(), aws.NewConfig().WithRegion("us-west-1").WithEndpoint("http://127.0.0.1:8000"))
 
 func registerAuthor(name string, displayName string, email string) (string, error) {
 	author := models.Author {
@@ -29,7 +30,7 @@ func registerAuthor(name string, displayName string, email string) (string, erro
 
 	// create the api params
 	params := &dynamodb.PutItemInput{
-		TableName: aws.String("Authors"),
+		TableName: aws.String(models.AuthorsTable),
 		Item:      authorAVMap,
 	}
 
@@ -75,16 +76,13 @@ func createSpace(name string, ownerEmail string) error {
 	return nil
 }
 
-func getAuthor(email string, displayName string) (models.Author, error) {
+func getAuthor(email string) (models.Author, error) {
 	var author models.Author
 	params := &dynamodb.GetItemInput{
-		TableName: aws.String("Authors"),
+		TableName: aws.String(models.AuthorsTable),
 		Key: map[string]*dynamodb.AttributeValue{
 			"email": {
 				S: aws.String(email),
-			},
-			"display_name": {
-				S: aws.String(displayName),
 			},
 		},
 	}
@@ -162,6 +160,7 @@ func createBlog(title string, content []byte, spaceName string, authorEmail stri
 		Approved: models.False,
 	}
 
+	//author, err := get
 	// marshal the movie struct into an aws attribute value
 	blogAVMap, err := dynamodbattribute.MarshalMap(blog)
 	if err != nil {
@@ -508,42 +507,4 @@ func getBlogsByAuthorEmail(authorEmail string) ([]models.Blog, error) {
 	blogs := []models.Blog{}
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &blogs)
 	return blogs, nil
-}
-
-func main() {
-	/*str, err := registerAuthor("kevin", "tile", "yo@yo.com")
-	if(err != nil ) {
-		fmt.Println("Failed to register author")
-	}
-
-	fmt.Println(str)
-	a, err := getAuthor("yo@yo.com", "tile")
-	if (err != nil) {
-		panic("RIP")
-	}
-
-	createSpace("FUNZONE", "yo@yo.com")
-
-	fmt.Println(a.Email)
-
-	s, err := getAuthorSpace("yo@yo.com")
-	if (err != nil) {
-		panic("RIP getAuthorSpace")
-	}
-	fmt.Println(s[0].Name)
-	createBlog("fun2",[]byte("mkmkk"),"FUNZONE","yo@yo.com")
-	*/
-	/*b, err := getBlog("fun1")
-	if (err != nil) {
-		panic("RIP make blog")
-	}*/
-
-	//approveBlog("FUNZONE", "fun2", "yo@yo.com")
-
-	b, err := getAllUnapprovedBlogsForSpace("FUNZONE")
-	if (err != nil) {
-		panic("RIP unapproved blog")
-	}
-
-	fmt.Println(b)
 }

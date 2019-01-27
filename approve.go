@@ -16,35 +16,11 @@ var errorLogger = log.New(os.Stderr, "ERROR ", log.Llongfile)
 
 func router(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch req.HTTPMethod {
-	case "GET":
-		return show(req)
-	case "POST":
+	case "PUT":
 		return create(req)
 	default:
 		return clientError(http.StatusMethodNotAllowed)
 	}
-}
-
-func show(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	email := req.QueryStringParameters[models.Email]
-
-	author, err := getAuthor(email)
-	if err != nil {
-		return serverError(err)
-	}
-	if author == nil {
-		return clientError(http.StatusNotFound)
-	}
-
-	js, err := json.Marshal(author)
-	if err != nil {
-		return serverError(err)
-	}
-
-	return events.APIGatewayProxyResponse{
-		StatusCode: http.StatusOK,
-		Body:       string(js),
-	}, nil
 }
 
 func create(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -52,24 +28,24 @@ func create(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 		return clientError(http.StatusNotAcceptable)
 	}
 
-	author := new(models.Author)
-	err := json.Unmarshal([]byte(req.Body), author)
+	approve := new(models.Approval)
+	err := json.Unmarshal([]byte(req.Body), approve)
 	if err != nil {
 		return clientError(http.StatusUnprocessableEntity)
 	}
 
-	if author.Email == "" || author.DisplayName == "" {
+	if approve.Title == "" || approve.SpaceName == "" || approve.ApproverEmail == "" {
 		return clientError(http.StatusBadRequest)
 	}
 
-	err = registerAuthor(author.Name, author.DisplayName, author.Email)
+	err = approveBlog(approve.SpaceName, approve.Title, approve.ApproverEmail)
 	if err != nil {
 		return serverError(err)
 	}
 
 	return events.APIGatewayProxyResponse{
-		StatusCode: 201,
-		Headers:    map[string]string{"Location": fmt.Sprintf("/author?email=%s", author.Email)},
+		StatusCode: 202,
+		Headers:    map[string]string{"Location": fmt.Sprintf("/approve?title=%s", approve.Title)},
 	}, nil
 }
 

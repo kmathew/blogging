@@ -1,5 +1,13 @@
 package models
 
+//envvars
+const EnvRegion string = "REGION"
+const EnvEndpoint string = "ENDPOINT"
+
+//defaults
+const DefaultRegion string = "us-west-1"
+const DefaultEndpoint string = "https://dynamodb.us-west-1.amazonaws.com"
+
 //indexes
 const LocalIndexAuthor string = "local_index_author"
 const LocalIndexApproved string = "local_index_approved"
