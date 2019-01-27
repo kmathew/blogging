@@ -225,11 +225,11 @@ func GetBlog(title string) ([]models.Blog, error) {
 }
 
 func ApproveBlog(spaceName string, blogTitle string, approverEmail string) (string, error) {
-	blogsList, err := getBlog(blogTitle)
+	blogsList, err := GetBlog(blogTitle)
 	if err != nil {
 		return "", err
 	}
-	spacesList, err := getAuthorSpace(approverEmail)
+	spacesList, err := GetAuthorSpace(approverEmail)
 
 	if err != nil {
 		return "", err
