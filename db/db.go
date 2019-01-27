@@ -15,6 +15,7 @@ var db = dynamodb.New(session.New(), aws.NewConfig().WithRegion(models.DefaultRe
 
 //var db = dynamodb.New(session.New(), aws.NewConfig().WithRegion("us-west-1").WithEndpoint("http://127.0.0.1:8000"))
 
+//Registers the author...
 func RegisterAuthor(name string, displayName string, email string) (string, error) {
 	author := models.Author{
 		Name:        name,
@@ -44,38 +45,7 @@ func RegisterAuthor(name string, displayName string, email string) (string, erro
 	return resp.GoString(), nil
 }
 
-func CreateSpace(name string, ownerEmail string) error {
-
-	space := models.Space{
-		Name:       name,
-		OwnerEmail: ownerEmail,
-	}
-
-	// marshal the movie struct into an aws attribute value
-	spaceAVMap, err := dynamodbattribute.MarshalMap(space)
-	if err != nil {
-		panic("Cannot marshal space into AttributeValue map")
-	}
-
-	// create the api params
-	params := &dynamodb.PutItemInput{
-		TableName: aws.String(models.SpacesTable),
-		Item:      spaceAVMap,
-	}
-
-	// put the item
-	resp, err := db.PutItem(params)
-	if err != nil {
-		fmt.Printf("ERROR: %v\n", err.Error())
-		return err
-	}
-
-	// print the response data
-	fmt.Println(resp)
-
-	return nil
-}
-
+// retrieves author object if exists
 func GetAuthor(email string) (models.Author, error) {
 	var author models.Author
 	params := &dynamodb.GetItemInput{
@@ -104,6 +74,44 @@ func GetAuthor(email string) (models.Author, error) {
 	return author, nil
 }
 
+//creates a space for the author
+func CreateSpace(name string, ownerEmail string) error {
+	a, err := GetAuthor(ownerEmail)
+
+	if(err != nil) {
+		return err
+	}
+
+	space := models.Space{
+		Name:       name,
+		OwnerEmail: a.Email,
+	}
+	// marshal the movie struct into an aws attribute value
+	spaceAVMap, err := dynamodbattribute.MarshalMap(space)
+	if err != nil {
+		panic("Cannot marshal space into AttributeValue map")
+	}
+
+	// create the api params
+	params := &dynamodb.PutItemInput{
+		TableName: aws.String(models.SpacesTable),
+		Item:      spaceAVMap,
+	}
+
+	// put the item
+	resp, err := db.PutItem(params)
+	if err != nil {
+		fmt.Printf("ERROR: %v\n", err.Error())
+		return err
+	}
+
+	// print the response data
+	fmt.Println(resp)
+
+	return nil
+}
+
+//retrieves spaces for author
 func GetAuthorSpace(authorEmail string) ([]models.Space, error) {
 	input := &dynamodb.QueryInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
@@ -146,6 +154,7 @@ func GetAuthorSpace(authorEmail string) ([]models.Space, error) {
 	return spaces, nil
 }
 
+//gets space by name
 func GetSpaceByName(spaceName string) ([]models.Space, error) {
 	input := &dynamodb.QueryInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
@@ -187,17 +196,27 @@ func GetSpaceByName(spaceName string) ([]models.Space, error) {
 	return spaces, nil
 }
 
+//create blog
 func CreateBlog(title string, content []byte, spaceName string, authorEmail string) (string, error) {
-	//generate id
-	//insert blog into table
-	//if spaceid belongs to authorid.... then auto approve
-	//if not then send blog for approval
+	//validate authorEmail
+	a, err := GetAuthor(authorEmail)
+
+	if(err != nil) {
+		return "", err
+	}
+
+	//validate Space
+	s, err := GetSpaceByName(spaceName)
+
+	if(err != nil) {
+		return "", err
+	}
 
 	blog := models.Blog{
 		Title:       title,
 		Content:     content,
-		SpaceName:   spaceName,
-		AuthorEmail: authorEmail,
+		SpaceName:   s[0].Name,
+		AuthorEmail: a.Email,
 		Approved:    models.False,
 	}
 
@@ -224,6 +243,7 @@ func CreateBlog(title string, content []byte, spaceName string, authorEmail stri
 	return resp.GoString(), nil
 }
 
+//Retrieves blog given its title
 func GetBlog(title string) ([]models.Blog, error) {
 	input := &dynamodb.QueryInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
@@ -265,6 +285,7 @@ func GetBlog(title string) ([]models.Blog, error) {
 	return blogs, nil
 }
 
+//Updated item in Blog table for approved status
 func ApproveBlog(spaceName string, blogTitle string, approverEmail string) (string, error) {
 	blogsList, err := GetBlog(blogTitle)
 	if err != nil {
@@ -334,6 +355,7 @@ func ApproveBlog(spaceName string, blogTitle string, approverEmail string) (stri
 
 }
 
+// return all approved blogs for a given space
 func GetBlogsForSpaceName(spaceName string) ([]models.Blog, error) {
 	//return all blogs associated with spaceid that are approved
 	input := &dynamodb.QueryInput{
@@ -378,6 +400,7 @@ func GetBlogsForSpaceName(spaceName string) ([]models.Blog, error) {
 	return blogs, nil
 }
 
+//return all approved blogs regardless of space
 func GetApprovedBlogs() ([]models.Blog, error) {
 	//get unapproved blogs
 	//return all blogs associated with spaceid that are unapproved
@@ -420,6 +443,7 @@ func GetApprovedBlogs() ([]models.Blog, error) {
 	return blogs, nil
 }
 
+//get all unapproved blogs
 func GetAllUnapprovedBlogs() ([]models.Blog, error) {
 	//get unapproved blogs
 	//return all blogs associated with spaceid that are unapproved
@@ -462,6 +486,7 @@ func GetAllUnapprovedBlogs() ([]models.Blog, error) {
 	return blogs, nil
 }
 
+// Get all unapproved blogs for a specific space
 func GetAllUnapprovedBlogsForSpace(spaceName string) ([]models.Blog, error) {
 	//get unapproved blogs
 	//return all blogs associated with spaceid that are unapproved
@@ -508,6 +533,7 @@ func GetAllUnapprovedBlogsForSpace(spaceName string) ([]models.Blog, error) {
 	return blogs, nil
 }
 
+// Get all blogs a specific author has written
 func GetBlogsByAuthorEmail(authorEmail string) ([]models.Blog, error) {
 	//return all blogs by author email
 	input := &dynamodb.QueryInput{
