@@ -163,7 +163,6 @@ func GetSpaceByName(spaceName string) ([]models.Space, error) {
 			},
 		},
 		KeyConditionExpression: aws.String("space_name = :v1"),
-		ProjectionExpression:   aws.String(models.SpaceName),
 		TableName:              aws.String(models.SpacesTable),
 	}
 
