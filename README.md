@@ -107,18 +107,17 @@ curl -X POST :/approve --data {"title": "fun1", "space_name": "FUNZONE", "yo@yo.
 ````
 
 ## Notes
-I have never worked with dynamoDB before. I had a rough understanding that it's meant to be used a Document store. 
+I have never worked with dynamoDB before. I had a rough understanding that it's meant to be used as a document store. 
 I wanted to play around with the SecondaryIndexes and did just that in this project. I have never used AWS lambda
-but I did learn how to use it to run my functions, creating api-gateways, and update IAM policies.
+but it worked out with my functions, creating api-gateways, and updating IAM policies.
 
 I would definitely do a few things differently in this project:
 
 - Outside of glide I'm not familiar with dep or vgo. I would probably include one of those dependency managements. 
 
-- I'm used to running stuff in Docker
-on my local. While I did find a way to run my own dynamoDB on localhost, I couldn't really setup a docker to emulate
-the lambda portion. I wish I had found AWS-SAM-CLI before I started this. It might have saved me some time
-and helped with the testing/make stuff look cleaner
+- I'm used to running stuff in Docker on my local. While I did find a way to run my own dynamoDB on localhost, 
+I couldn't really setup a docker to emulate the lambda portion. I wish I had found AWS-SAM-CLI before I started this. 
+It might have saved me some time and helped with the testing/make stuff look cleaner
 
 - A redesign for the Table structure for the data needs to be considered. I originally had designed the tables for
 RDBMS instead of a denormalized one. A form of caching definitely needs to be used. Some of the functions have expensive
