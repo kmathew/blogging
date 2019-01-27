@@ -25,24 +25,24 @@ after deploying, test the api gateway. If you get a 500 Internal Server error, g
 for to see what permission is missing for a specific resource. It might be one of the tables for this
 service to work.
 
-#####Register Author
+##### Register Author
 curl <uri>:/authors
 POST --data {
              	"name": "kev",
              	"display_name": "sdfsf",
              	"email": "yo@yo.com"
              }
-#####Get Author Obj
+##### Get Author Obj
 curl :/authors?email=<email-address>
 
-#####Create Space
+##### Create Space
 curl -X POST :/spaces  --data { "space_name": "FUNZONE", "owner_email": "yo@yo.com" }
 
-#####Get Space by Author Email
+##### Get Space by Author Email
 curl :/spaces?owner_email=<email-address>
 
-#####Create Blog
+##### Create Blog
 curl -X POST :/blogs --date {"title": "fun1", "content": "bytes of data here", "space_name": "FUNZONE", "yo@yo.com" }
 
-#####Get Blog by Title
+##### Get Blog by Title
 curl :/blogs?title=<title-name-here>
