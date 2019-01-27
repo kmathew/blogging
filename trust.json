@@ -12,33 +12,14 @@
         "dynamodb:PutItem",
         "dynamodb:UpdateItem"
       ],
-      "Resource": "arn:aws:dynamodb:us-west-1:<id>:table/Authors"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "dynamodb:BatchGetItem",
-        "dynamodb:GetItem",
-        "dynamodb:Query",
-        "dynamodb:Scan",
-        "dynamodb:BatchWriteItem",
-        "dynamodb:PutItem",
-        "dynamodb:UpdateItem"
-      ],
-      "Resource": "arn:aws:dynamodb:us-west-1:<id>:table/Blogs"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "dynamodb:BatchGetItem",
-        "dynamodb:GetItem",
-        "dynamodb:Query",
-        "dynamodb:Scan",
-        "dynamodb:BatchWriteItem",
-        "dynamodb:PutItem",
-        "dynamodb:UpdateItem"
-      ],
-      "Resource": "arn:aws:dynamodb:us-west-1:<id>:table/Spaces"
+      "Resource": [
+        "arn:aws:dynamodb:us-west-1:<id>:table/Authors",
+        "arn:aws:dynamodb:us-west-1:<id>:table/Authors/index/*",
+        "arn:aws:dynamodb:us-west-1:<id>:table/Blogs",
+        "arn:aws:dynamodb:us-west-1:<id>:table/Blogs/index/*",
+        "arn:aws:dynamodb:us-west-1:<id>:table/Spaces",
+        "arn:aws:dynamodb:us-west-1:<id>:table/Spaces/index/*"
+      ]
     },
     {
       "Effect": "Allow",
@@ -46,7 +27,7 @@
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:eu-west-1:<id>:*"
+      "Resource": "arn:aws:logs:eu-west-1:123456789012:*"
     },
     {
       "Effect": "Allow",
